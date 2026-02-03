@@ -11,30 +11,31 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 @RestController
+@RequestMapping("/api")
 public class CategoryController {
+
     @Autowired
     private CategoryServices categoryServices;
 
-
-
-    @GetMapping("/api/public/categories")
-    public List<Category> getAllCategories() {
-        return categoryServices.getAllcategories();
+    @GetMapping("/public/categories")
+    public ResponseEntity<List<Category>> getAllCategories() {
+        List<Category> allcategories = categoryServices.getAllcategories();
+        return new ResponseEntity<>(allcategories, HttpStatus.OK);
     }
 
-    @PostMapping("/api/public/categories")
-    public String createCategory(@RequestBody Category category) {
+    @PostMapping("/public/categories")
+    public ResponseEntity<String> createCategory(@RequestBody Category category) {
         categoryServices.createCategory(category);
-        return "Category created Successfully";
+        return new ResponseEntity<>("Category created Successfully", HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/api/admin/categories/{categoryId}")
+    @DeleteMapping("/admin/categories/{categoryId}")
     public ResponseEntity<String> deleteCategory(@PathVariable Long categoryId) {
-        try{
+        try {
             String status = categoryServices.deleteCategory(categoryId);
             return new ResponseEntity<>(status, HttpStatus.OK);
-        }catch (ResponseStatusException e){
-            return new ResponseEntity<>(e.getReason(),e.getStatusCode());
+        } catch (ResponseStatusException e) {
+            return new ResponseEntity<>(e.getReason(), e.getStatusCode());
         }
     }
 
@@ -50,3 +51,5 @@ public class CategoryController {
 
     }
 }
+
+
