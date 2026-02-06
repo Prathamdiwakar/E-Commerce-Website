@@ -12,7 +12,7 @@ import java.util.*;
 @Service
 public class CategoryServiceImpl implements CategoryServices {
 
-    public long nextId = 1l;
+
     @Autowired
     private CategoryRepository categoryRepository;
 
