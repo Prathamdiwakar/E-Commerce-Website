@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
      @GeneratedValue(strategy = GenerationType.IDENTITY)
      private Long categoryId;
      @NotBlank
-     @Size(min = 5, message = "Size Must Be Atleast Of 5")
+     @Size(min = 5, message = "Size Must Be AtLeast Of 5")
      private String categoryName;
 
 }
