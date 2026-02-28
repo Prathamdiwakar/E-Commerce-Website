@@ -1,16 +1,15 @@
 package com.ecommerce.project.Model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-     @Entity(name="Categories")
+import java.util.List;
+
+@Entity(name="Categories")
      @Data
      @NoArgsConstructor
      @AllArgsConstructor
@@ -22,5 +21,8 @@ import lombok.NoArgsConstructor;
      @NotBlank
      @Size(min = 5, message = "Size Must Be AtLeast Of 5")
      private String categoryName;
+
+      @OneToMany(mappedBy = "category" , cascade = CascadeType.ALL)
+      private List<Product> products;
 
 }
