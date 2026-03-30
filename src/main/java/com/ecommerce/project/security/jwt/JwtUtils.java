@@ -1,15 +1,19 @@
 package com.ecommerce.project.security.jwt;
 
+import com.ecommerce.project.security.service.UserDetailsImpl;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.WebUtils;
 
 import javax.crypto.SecretKey;
 import java.security.Key;
@@ -25,19 +29,37 @@ public class JwtUtils {
     @Value("${spring.app.jwtSecret}")
     private String jwtSecret;
 
-    // getting Jwt From Header
-    public String getJwtHeader(HttpServletRequest request) {
-        String BearerToken = request.getHeader("Authorization");
-        logger.debug("Authorization Header: {}" ,BearerToken);
-        if (BearerToken != null && BearerToken.startsWith("Bearer ")) {
-            return BearerToken.substring(7);
+    @Value("${spring.ecom.app.jwtCookieName}")
+    private String jwtCookie;
+
+
+    public String getJwtFromCookie(HttpServletRequest request) {
+        Cookie cookie = WebUtils.getCookie(request, jwtCookie);
+        if (cookie != null) {
+            System.out.println("COOKIE :" +cookie.getValue());
+            return cookie.getValue();
+        } else {
+            return null;
         }
-        return null;
+    }
+
+    public ResponseCookie generateJwtCookie(UserDetailsImpl userPrincipal) {
+        String jwt = generateTokenFromUsername(userPrincipal.getUsername());
+        return ResponseCookie.from(jwtCookie, jwt)
+                .path("/api")
+                .maxAge(24 * 60 * 60)
+                .httpOnly(false)
+                .build();
+    }
+
+    public ResponseCookie getCleanJwtCookie() {
+        return ResponseCookie.from(jwtCookie, null)
+                .path("/api")
+                .build();
     }
 
     // Generating Token From Username
-    public  String generateTokenFromUsername(UserDetails userDetails){
-        String username = userDetails.getUsername();
+    public String generateTokenFromUsername(String username) {
         return Jwts.builder()
                 .subject(username)
                 .issuedAt(new Date())
@@ -47,7 +69,7 @@ public class JwtUtils {
     }
 
     // Getting Username From Token
-    public  String getUsernameFromToken(String token){
+    public String getUsernameFromToken(String token) {
         return Jwts.parser()
                 .verifyWith((SecretKey) key())
                 .build().parseSignedClaims(token)
@@ -55,7 +77,7 @@ public class JwtUtils {
     }
     // Generate Signing key
 
-    public Key key(){
+    public Key key() {
         return Keys.hmacShaKeyFor(
                 Decoders.BASE64.decode(jwtSecret)
         );
@@ -63,7 +85,7 @@ public class JwtUtils {
 
     // Validate JWT token
 
-    public Boolean validateToken(String authToken){
+    public Boolean validateToken(String authToken) {
         try {
             System.out.println("Validating Token");
             Jwts.parser()
@@ -71,8 +93,8 @@ public class JwtUtils {
                     .build()
                     .parseSignedClaims(authToken);
             return true;
-        }catch (MalformedJwtException e){
-            logger.error("Invalid Token {}" , e.getMessage());
+        } catch (MalformedJwtException e) {
+            logger.error("Invalid Token {}", e.getMessage());
         }
         return false;
     }
