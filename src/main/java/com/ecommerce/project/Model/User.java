@@ -25,7 +25,7 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "userid")
-    private Long Userid;
+    private Long userId;
 
     @NotBlank
     @Size(max = 20)
@@ -63,6 +63,10 @@ public class User {
     @JoinTable(name = "user_addresses", joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "address_id"))
     private List<Address> addresses = new ArrayList<>();
+
+    @ToString.Exclude
+    @OneToOne(mappedBy = "user", cascade = {MERGE,PERSIST} , orphanRemoval = true)
+    private cart carts;
 
     @ToString.Exclude
     @OneToMany(mappedBy = "user",
